@@ -15,22 +15,28 @@ export default function TabLayout() {
         tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
         headerShown: false,
         tabBarButton: HapticTab,
-      }}
-      initialRouteName="signup">
-     <Tabs.Screen
-       name="signup"
-       options={{
-         title: 'Sign Up',
-         tabBarIcon: ({ color }) => <IconSymbol size={28} name="person.fill" color={color} />,
-       }}
-     />
-     <Tabs.Screen
-       name="login"
-       options={{
-         title: 'Login',
-         tabBarIcon: ({ color }) => <IconSymbol size={28} name="person.circle" color={color} />,
-       }}
-     />
-   </Tabs>
+      }}>
+      <Tabs.Screen
+        name="feed"
+        options={{
+          title: 'Feed',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="create"
+        options={{
+          title: 'Create',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="plus.circle" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: 'Profile',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="person.circle" color={color} />,
+        }}
+      />
+    </Tabs>
   );
 }
