@@ -65,6 +65,8 @@ export default function SignupScreen() {
     createdAt: Date;
   }
 
+  const router = useRouter();
+
   async function handleSubmit(
     fullname: SignupFormData["fullname"],
     username: SignupFormData["username"],
@@ -97,7 +99,7 @@ export default function SignupScreen() {
     }
   }
 
-  const router = useRouter();
+
 
   return (
     <View style={styles.container}>
