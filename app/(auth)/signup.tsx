@@ -60,6 +60,7 @@ export default function SignupScreen() {
   }
 
   interface FramezUserProfile {
+    email: string;
     fullname: string;
     username: string;
     createdAt: Date;
@@ -83,12 +84,13 @@ export default function SignupScreen() {
 
         // store extra information
         const profile: FramezUserProfile = {
+          email,
           fullname,
           username,
           createdAt: new Date(),
         };
         await setDoc(doc(db, "framez_users", user.uid), profile);
-        console.log("User profile created");
+        console.log("User profile created", profile);
         router.push("/feed");
       } catch (error) {
         console.error("Signup error:", error);

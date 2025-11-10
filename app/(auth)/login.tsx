@@ -8,8 +8,10 @@ import {
   Text,
   TouchableOpacity,
 } from "react-native";
+import { doc, getDoc } from "firebase/firestore";
+import { useUser } from "../../context/UserContext";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-import { app} from "../../firebaseConfig";
+import { app, db } from "../../firebaseConfig";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
@@ -17,6 +19,7 @@ export default function LoginScreen() {
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
   const [isFormValid, setIsFormValid] = useState(false);
   const auth = getAuth(app);
+  const { setUser } = useUser();
 
   useEffect(() => {
     const validateForm = () => {
@@ -57,14 +60,23 @@ export default function LoginScreen() {
   ): Promise<void> {
     if (isFormValid) {
       try {
-        const userCredential = (await signInWithEmailAndPassword(
+        const userCredential = await signInWithEmailAndPassword(
           auth,
           email,
           password
-        ))
+        );
 
-      
-        console.log("User logged in successfully:", userCredential.user);
+        const user = userCredential.user;
+        const userDoc = await getDoc(doc(db, "framez_users", user.uid));
+        if (userDoc.exists()) {
+          setUser({
+            uid: user.uid,
+            email: user.email ?? "",
+            ...userDoc.data(),
+          } as FramezUser);
+        }
+
+        console.log("User logged in successfully:", user);
         router.push("/feed");
       } catch (error) {
         console.error("Login error:", error);
@@ -92,20 +104,22 @@ export default function LoginScreen() {
         secureTextEntry
         onChangeText={(text) => setPassword(text)}
       />
-      <Button title={"Login"}
-      disabled={!isFormValid}
-      onPress={() => {
-        handleSubmit(email, password);
-      }} />
+      <Button
+        title={"Login"}
+        disabled={!isFormValid}
+        onPress={() => {
+          handleSubmit(email, password);
+        }}
+      />
       <TouchableOpacity onPress={() => router.push("/signup")}>
         <Text style={styles.link}>Don&apos;t have an account? Sign Up</Text>
       </TouchableOpacity>
-       {/* Display error messages */}
-            {Object.values(errors).map((error, index) => (
-              <Text key={index} style={styles.error}>
-                {error}
-              </Text>
-            ))}
+      {/* Display error messages */}
+      {Object.values(errors).map((error, index) => (
+        <Text key={index} style={styles.error}>
+          {error}
+        </Text>
+      ))}
     </View>
   );
 }
@@ -139,7 +153,7 @@ const styles = StyleSheet.create({
     color: "#FF69B4",
     textDecorationLine: "underline",
   },
-   error: {
+  error: {
     color: "red",
     fontSize: 20,
     marginBottom: 12,
