@@ -53,7 +53,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
             });
           }
         } catch (err) {
-          console.error("Error fetching user profile:", err);
+          console.log(err);
         }
       } else {
         // Logged out

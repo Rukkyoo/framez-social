@@ -4,13 +4,9 @@ import { ThemedText } from "../../components/themed-text";
 import { ThemedView } from "../../components/themed-view";
 import { useUser } from "../../context/UserContext";
 import { Fonts } from "../../constants/theme";
-/* import { useThemeColor } from "../../hooks/use-theme-color"; */
-
 
 export default function ProfileScreen() {
   const { user } = useUser();
-  /* const backgroundColor = useThemeColor({}, 'background');
-  const textColor = useThemeColor({}, 'text'); */
 
   return (
     <ThemedView style={styles.container}>
