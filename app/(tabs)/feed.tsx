@@ -1,13 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, ScrollView, View, Image } from "react-native";
+import { StyleSheet, ScrollView, View, Image, TouchableOpacity, Text } from "react-native";
 import { ThemedText } from "../../components/themed-text";
 import { ThemedView } from "../../components/themed-view";
+import { useUser } from "../../context/UserContext";
 import { collection, query, orderBy, getDocs } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 import { Fonts } from "../../constants/theme";
+import { useRouter } from "expo-router";
 
 export default function FeedScreen() {
+  const { user } = useUser();
   const [posts, setPosts] = useState<any[]>([]);
+  const router = useRouter();
+
   const postsCollectionRef = collection(db, "posts");
   const q = query(postsCollectionRef, orderBy("createdAt", "desc"));
 
@@ -22,8 +27,28 @@ export default function FeedScreen() {
   };
 
   useEffect(() => {
-    getLatestPosts();
-  }, []);
+    if (user) {
+      getLatestPosts();
+    }
+  }, [user]);
+
+  if (!user) {
+    return (
+      <ThemedView style={styles.container}>
+        <View style={styles.loginPrompt}>
+          <ThemedText style={styles.promptText}>
+            Please log in to view the feed
+          </ThemedText>
+          <TouchableOpacity
+            style={styles.loginButton}
+            onPress={() => router.push("/login")}
+          >
+            <Text style={styles.loginButtonText}>Go to Login</Text>
+          </TouchableOpacity>
+        </View>
+      </ThemedView>
+    );
+  }
 
   return (
     <ThemedView style={styles.container}>
@@ -68,7 +93,7 @@ export default function FeedScreen() {
               )}
               <View style={styles.postContent}>
                 <ThemedText style={styles.username}>
-                  {post.username || "Anonymous"}
+                  @{post.username || "Anonymous"}
                 </ThemedText>
                 <ThemedText style={styles.postText}>{post.text}</ThemedText>
                 <ThemedText style={styles.dateText}>
@@ -187,5 +212,28 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#999",
     textAlign: "right",
+  },
+  loginPrompt: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  promptText: {
+    color: "#ccc",
+    fontSize: 16,
+    textAlign: "center",
+    marginBottom: 20,
+  },
+  loginButton: {
+    backgroundColor: "#FF69B4",
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+  },
+  loginButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+    textAlign: "center",
   },
 });

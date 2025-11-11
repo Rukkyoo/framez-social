@@ -6,6 +6,7 @@ import {
   Alert,
   ActivityIndicator,
   View,
+  Text,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { Image } from "expo-image";
@@ -16,12 +17,33 @@ import { uploadImageToCloudinary } from "../utils/uploadImage";
 import { db } from "@/firebaseConfig";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { useUser } from "@/context/UserContext";
+import { useRouter } from "expo-router";
 
 export default function CreateScreen() {
+  const { user } = useUser();
+  const router = useRouter();
+
   const [text, setText] = useState("");
   const [imageUri, setImageUri] = useState<string | undefined>(undefined);
   const [loading, setLoading] = useState(false);
-  const { user } = useUser();
+
+  if (!user) {
+    return (
+      <ThemedView style={styles.container}>
+        <View style={styles.loginPrompt}>
+          <ThemedText style={styles.promptText}>
+            Please log in to create posts
+          </ThemedText>
+          <TouchableOpacity
+            style={styles.loginButton}
+            onPress={() => router.push("/login")}
+          >
+            <Text style={styles.loginButtonText}>Go to Login</Text>
+          </TouchableOpacity>
+        </View>
+      </ThemedView>
+    );
+  }
 
   const handleImageSelect = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -233,5 +255,28 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 18,
     fontWeight: "bold",
+  },
+  loginPrompt: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  promptText: {
+    color: "#ccc",
+    fontSize: 16,
+    textAlign: "center",
+    marginBottom: 20,
+  },
+  loginButton: {
+    backgroundColor: "#FF69B4",
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+  },
+  loginButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+    textAlign: "center",
   },
 });
