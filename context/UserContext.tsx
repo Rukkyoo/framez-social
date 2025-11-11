@@ -34,7 +34,9 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log("Setting up auth state listener...");
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      console.log("Auth state changed, firebaseUser:", firebaseUser ? "exists" : "null");
       if (firebaseUser) {
         try {
           const userDoc = await getDoc(
