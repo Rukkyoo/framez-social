@@ -13,41 +13,52 @@ import { useUser } from "../../context/UserContext";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import { app, db } from "../../firebaseConfig";
 
+interface FramezUser {
+  uid: string;
+  email: string;
+  displayName?: string;
+  photoURL?: string;
+  [key: string]: any;
+}
+
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [touched, setTouched] = useState<{ [key: string]: boolean }>({
+    email: false,
+    password: false,
+  });
   const [isFormValid, setIsFormValid] = useState(false);
+
   const auth = getAuth(app);
   const { setUser } = useUser();
+  const router = useRouter();
 
+  // Run validation when user interacts with fields
   useEffect(() => {
     const validateForm = () => {
-      let errors: { [key: string]: string } = {};
+      let newErrors: { [key: string]: string } = {};
 
-      // Validate email field
-      if (!email) {
-        errors.email = "Email is required.";
-      } else if (!/\S+@\S+\.\S+/.test(email)) {
-        errors.email = "Email is invalid.";
+      if (touched.email) {
+        if (!email) newErrors.email = "Email is required.";
+        else if (!/\S+@\S+\.\S+/.test(email)) newErrors.email = "Invalid email.";
       }
 
-      // Validate password field
-      if (!password) {
-        errors.password = "Password is required.";
-      } else if (password.length < 6) {
-        errors.password = "Password must be at least 6 characters.";
+      if (touched.password) {
+        if (!password) newErrors.password = "Password is required.";
+        else if (password.length < 6)
+          newErrors.password = "Password must be at least 6 characters.";
       }
 
-      // Set the errors and update form validity
-      setErrors(errors);
-      setIsFormValid(Object.keys(errors).length === 0);
+      setErrors(newErrors);
+      setIsFormValid(
+        Object.keys(newErrors).length === 0 && Boolean(email) && Boolean(password)
+      );
     };
 
     validateForm();
-  }, [email, password]);
-
-  const router = useRouter();
+  }, [email, password, touched]);
 
   interface SignupFormData {
     email: string;
@@ -82,44 +93,48 @@ export default function LoginScreen() {
         console.error("Login error:", error);
       }
     } else {
-      // Form is invalid, display error messages
       console.log("Form has errors. Please correct them.");
+      setTouched({ email: true, password: true }); // Show errors if trying to submit too early
     }
   }
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Login</Text>
+
       <TextInput
         style={styles.input}
         value={email}
-        placeholder={"Email"}
+        placeholder="Email"
         onChangeText={(text) => setEmail(text)}
-        autoCapitalize={"none"}
+        onBlur={() => setTouched((prev) => ({ ...prev, email: true }))}
+        autoCapitalize="none"
       />
+      {errors.email && touched.email && (
+        <Text style={styles.error}>{errors.email}</Text>
+      )}
+
       <TextInput
         style={styles.input}
         value={password}
-        placeholder={"Password"}
+        placeholder="Password"
         secureTextEntry
         onChangeText={(text) => setPassword(text)}
+        onBlur={() => setTouched((prev) => ({ ...prev, password: true }))}
       />
+      {errors.password && touched.password && (
+        <Text style={styles.error}>{errors.password}</Text>
+      )}
+
       <Button
-        title={"Login"}
+        title="Login"
         disabled={!isFormValid}
-        onPress={() => {
-          handleSubmit(email, password);
-        }}
+        onPress={() => handleSubmit(email, password)}
       />
+
       <TouchableOpacity onPress={() => router.push("/signup")}>
         <Text style={styles.link}>Don&apos;t have an account? Sign Up</Text>
       </TouchableOpacity>
-      {/* Display error messages */}
-      {Object.values(errors).map((error, index) => (
-        <Text key={index} style={styles.error}>
-          {error}
-        </Text>
-      ))}
     </View>
   );
 }
@@ -155,7 +170,8 @@ const styles = StyleSheet.create({
   },
   error: {
     color: "red",
-    fontSize: 20,
-    marginBottom: 12,
+    fontSize: 14,
+    alignSelf: "flex-start",
+    marginBottom: 8,
   },
 });

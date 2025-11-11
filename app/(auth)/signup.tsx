@@ -17,40 +17,59 @@ export default function SignupScreen() {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [touched, setTouched] = useState<{ [key: string]: boolean }>({
+    fullname: false,
+    username: false,
+    email: false,
+    password: false,
+  });
   const [isFormValid, setIsFormValid] = useState(false);
+
   const auth = getAuth(app);
+  const router = useRouter();
 
   useEffect(() => {
     const validateForm = () => {
-      let errors: { [key: string]: string } = {};
+      let newErrors: { [key: string]: string } = {};
 
-      // Validate name field
-      if (!fullname) {
-        errors.fullname = "Name is required.";
+      if (touched.fullname) {
+        if (!fullname) newErrors.fullname = "Full name is required.";
       }
 
-      // Validate email field
-      if (!email) {
-        errors.email = "Email is required.";
-      } else if (!/\S+@\S+\.\S+/.test(email)) {
-        errors.email = "Email is invalid.";
+      if (touched.username) {
+        if (!username) newErrors.username = "Username is required.";
+        else if (username.length < 3)
+          newErrors.username = "Username must be at least 3 characters.";
       }
 
-      // Validate password field
-      if (!password) {
-        errors.password = "Password is required.";
-      } else if (password.length < 6) {
-        errors.password = "Password must be at least 6 characters.";
+      if (touched.email) {
+        if (!email) newErrors.email = "Email is required.";
+        else if (!/\S+@\S+\.\S+/.test(email))
+          newErrors.email = "Email is invalid.";
       }
 
-      // Set the errors and update form validity
-      setErrors(errors);
-      setIsFormValid(Object.keys(errors).length === 0);
+      if (touched.password) {
+        if (!password) newErrors.password = "Password is required.";
+        else if (password.length < 6)
+          newErrors.password = "Password must be at least 6 characters.";
+      }
+
+      setErrors(newErrors);
+      setIsFormValid(
+        Boolean(
+          Object.keys(newErrors).length === 0 &&
+            fullname &&
+            username &&
+            email &&
+            password
+        )
+      );
     };
 
     validateForm();
-  }, [fullname, username, email, password]);
+  }, [fullname, username, email, password, touched]);
 
   interface SignupFormData {
     fullname: string;
@@ -66,8 +85,6 @@ export default function SignupScreen() {
     createdAt: Date;
   }
 
-  const router = useRouter();
-
   async function handleSubmit(
     fullname: SignupFormData["fullname"],
     username: SignupFormData["username"],
@@ -82,7 +99,6 @@ export default function SignupScreen() {
           password
         )) as { user: { uid: string } };
 
-        // store extra information
         const profile: FramezUserProfile = {
           email,
           fullname,
@@ -96,60 +112,81 @@ export default function SignupScreen() {
         console.error("Signup error:", error);
       }
     } else {
-      // Form is invalid, display error messages
       console.log("Form has errors. Please correct them.");
+      setTouched({
+        fullname: true,
+        username: true,
+        email: true,
+        password: true,
+      }); // show errors if submit too early
     }
   }
-
-
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Sign Up</Text>
+
+      {/* Full Name */}
       <TextInput
         style={styles.input}
         value={fullname}
-        placeholder={"Full Name"}
+        placeholder="Full Name"
         onChangeText={(text) => setFullname(text)}
+        onBlur={() => setTouched((prev) => ({ ...prev, fullname: true }))}
       />
+      {errors.fullname && touched.fullname && (
+        <Text style={styles.error}>{errors.fullname}</Text>
+      )}
+
+      {/* Username */}
       <TextInput
         style={styles.input}
         value={username}
-        placeholder={"Username"}
+        placeholder="Username"
         onChangeText={(text) => setUsername(text)}
-        autoCapitalize={"none"}
+        onBlur={() => setTouched((prev) => ({ ...prev, username: true }))}
+        autoCapitalize="none"
       />
+      {errors.username && touched.username && (
+        <Text style={styles.error}>{errors.username}</Text>
+      )}
+
+      {/* Email */}
       <TextInput
         style={styles.input}
         value={email}
-        placeholder={"Email"}
+        placeholder="Email"
         onChangeText={(text) => setEmail(text)}
-        keyboardType={"email-address"}
-        autoCapitalize={"none"}
+        onBlur={() => setTouched((prev) => ({ ...prev, email: true }))}
+        keyboardType="email-address"
+        autoCapitalize="none"
       />
+      {errors.email && touched.email && (
+        <Text style={styles.error}>{errors.email}</Text>
+      )}
+
+      {/* Password */}
       <TextInput
         style={styles.input}
         value={password}
-        placeholder={"Password"}
+        placeholder="Password"
         secureTextEntry
         onChangeText={(text) => setPassword(text)}
+        onBlur={() => setTouched((prev) => ({ ...prev, password: true }))}
       />
+      {errors.password && touched.password && (
+        <Text style={styles.error}>{errors.password}</Text>
+      )}
+
       <Button
-        title={"Sign Up"}
+        title="Sign Up"
         disabled={!isFormValid}
-        onPress={() => {
-          handleSubmit(fullname, username, email, password);
-        }}
+        onPress={() => handleSubmit(fullname, username, email, password)}
       />
+
       <TouchableOpacity onPress={() => router.push("/login")}>
         <Text style={styles.link}>Already have an account? Login</Text>
       </TouchableOpacity>
-      {/* Display error messages */}
-      {Object.values(errors).map((error, index) => (
-        <Text key={index} style={styles.error}>
-          {error}
-        </Text>
-      ))}
     </View>
   );
 }
@@ -185,7 +222,8 @@ const styles = StyleSheet.create({
   },
   error: {
     color: "red",
-    fontSize: 20,
-    marginBottom: 12,
+    fontSize: 14,
+    alignSelf: "flex-start",
+    marginBottom: 8,
   },
 });

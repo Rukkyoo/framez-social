@@ -1,14 +1,25 @@
 import React, { useEffect, useState } from "react";
-import { StyleSheet, View, Image, ScrollView } from "react-native";
+import {
+  StyleSheet,
+  View,
+  Image,
+  ScrollView,
+  TouchableOpacity,
+  Text,
+} from "react-native";
 import { ThemedText } from "../../components/themed-text";
 import { ThemedView } from "../../components/themed-view";
 import { useUser } from "../../context/UserContext";
 import { Fonts } from "../../constants/theme";
+import { getAuth, signOut } from "firebase/auth";
+import { useRouter } from "expo-router";
 import { collection, query, where, orderBy, getDocs } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 
 export default function ProfileScreen() {
   const { user } = useUser();
+  const router = useRouter();
+
   const [userPosts, setUserPosts] = useState<any[]>([]);
 
   const fetchUserPosts = async () => {
@@ -30,6 +41,28 @@ export default function ProfileScreen() {
   useEffect(() => {
     fetchUserPosts();
   }, [user]);
+
+  if (!user) {
+    return (
+      <ThemedView style={styles.container}>
+        <View style={styles.loginPrompt}>
+          <ThemedText style={styles.promptText}>
+            Please log in to view your profile
+          </ThemedText>
+          <TouchableOpacity
+            style={styles.loginButton}
+            onPress={() => router.push("/login")}
+          >
+            <Text style={styles.loginButtonText}>Go to Login</Text>
+          </TouchableOpacity>
+        </View>
+      </ThemedView>
+    );
+  }
+
+  const auth = getAuth(); // Get the Firebase Auth instance
+  console.log("ProfileScreen rendered, user:", user);
+  console.log("Current auth user:", auth.currentUser);
 
   return (
     <ThemedView style={styles.container}>
@@ -63,6 +96,15 @@ export default function ProfileScreen() {
             @{user?.username || "username"}
           </ThemedText>
           <ThemedText style={styles.emailText}>{user?.email}</ThemedText>
+          {user ? (
+            <TouchableOpacity onPress={() => signOut(auth)}>
+              <Text style={styles.logoutText}>Click to logout</Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity onPress={() => router.push("/login")}>
+              <Text style={styles.logoutText}>Log in here</Text>
+            </TouchableOpacity>
+          )}
         </View>
 
         {/* User’s Posts */}
@@ -237,5 +279,32 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#999",
     textAlign: "right",
+  },
+  logoutText: {
+    color: "#FF69B4",
+    fontSize: 16,
+  },
+  loginPrompt: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  promptText: {
+    color: "#ccc",
+    fontSize: 16,
+    textAlign: "center",
+    marginBottom: 20,
+  },
+  loginButton: {
+    backgroundColor: "#FF69B4",
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+  },
+  loginButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+    textAlign: "center",
   },
 });
