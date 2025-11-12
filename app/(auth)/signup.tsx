@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from "react";
 import {
-  Button,
   StyleSheet,
   TextInput,
   View,
   Text,
   TouchableOpacity,
+  Pressable
 } from "react-native";
 import { useRouter } from "expo-router";
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
-import { app, db } from "../../firebaseConfig";
+import { auth, db } from "../../firebaseConfig";
 
 export default function SignupScreen() {
   const [fullname, setFullname] = useState("");
@@ -27,7 +27,7 @@ export default function SignupScreen() {
   });
   const [isFormValid, setIsFormValid] = useState(false);
 
-  const auth = getAuth(app);
+  const auth = getAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -131,6 +131,7 @@ export default function SignupScreen() {
         style={styles.input}
         value={fullname}
         placeholder="Full Name"
+        placeholderTextColor="#000000"
         onChangeText={(text) => setFullname(text)}
         onBlur={() => setTouched((prev) => ({ ...prev, fullname: true }))}
       />
@@ -143,6 +144,7 @@ export default function SignupScreen() {
         style={styles.input}
         value={username}
         placeholder="Username"
+        placeholderTextColor="#000000"
         onChangeText={(text) => setUsername(text)}
         onBlur={() => setTouched((prev) => ({ ...prev, username: true }))}
         autoCapitalize="none"
@@ -156,6 +158,7 @@ export default function SignupScreen() {
         style={styles.input}
         value={email}
         placeholder="Email"
+        placeholderTextColor="#000000"
         onChangeText={(text) => setEmail(text)}
         onBlur={() => setTouched((prev) => ({ ...prev, email: true }))}
         keyboardType="email-address"
@@ -170,6 +173,7 @@ export default function SignupScreen() {
         style={styles.input}
         value={password}
         placeholder="Password"
+        placeholderTextColor="#000000"
         secureTextEntry
         onChangeText={(text) => setPassword(text)}
         onBlur={() => setTouched((prev) => ({ ...prev, password: true }))}
@@ -178,11 +182,21 @@ export default function SignupScreen() {
         <Text style={styles.error}>{errors.password}</Text>
       )}
 
-      <Button
+      {/* <Button
         title="Sign Up"
         disabled={!isFormValid}
         onPress={() => handleSubmit(fullname, username, email, password)}
-      />
+      /> */}
+      <Pressable
+              style={[
+                styles.signupButton,
+                !isFormValid && styles.disabledButton,
+              ]}
+              onPress={() => handleSubmit(fullname, username, email, password)}
+              disabled={!isFormValid}
+            >
+              <Text style={styles.signupButtonText}>Sign Up</Text>
+            </Pressable>
 
       <TouchableOpacity onPress={() => router.push("/login")}>
         <Text style={styles.link}>Already have an account? Login</Text>
@@ -225,5 +239,20 @@ const styles = StyleSheet.create({
     fontSize: 14,
     alignSelf: "flex-start",
     marginBottom: 8,
+  },
+  signupButton: {
+    backgroundColor: "#1E90FF",
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  signupButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
+    paddingHorizontal: 20,
+  },
+  disabledButton: {
+    backgroundColor: "#aaa",
   },
 });

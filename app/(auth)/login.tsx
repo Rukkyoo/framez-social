@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "expo-router";
 import {
-  Button,
   StyleSheet,
   TextInput,
   View,
   Text,
   TouchableOpacity,
+  Pressable,
 } from "react-native";
 import { doc, getDoc } from "firebase/firestore";
 import { useUser } from "../../context/UserContext";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-import { app, db } from "../../firebaseConfig";
+import { auth, db } from "../../firebaseConfig";
 
 interface FramezUser {
   uid: string;
@@ -31,7 +31,7 @@ export default function LoginScreen() {
   });
   const [isFormValid, setIsFormValid] = useState(false);
 
-  const auth = getAuth(app);
+  const auth = getAuth();
   const { setUser } = useUser();
   const router = useRouter();
 
@@ -42,7 +42,8 @@ export default function LoginScreen() {
 
       if (touched.email) {
         if (!email) newErrors.email = "Email is required.";
-        else if (!/\S+@\S+\.\S+/.test(email)) newErrors.email = "Invalid email.";
+        else if (!/\S+@\S+\.\S+/.test(email))
+          newErrors.email = "Invalid email.";
       }
 
       if (touched.password) {
@@ -53,7 +54,9 @@ export default function LoginScreen() {
 
       setErrors(newErrors);
       setIsFormValid(
-        Object.keys(newErrors).length === 0 && Boolean(email) && Boolean(password)
+        Object.keys(newErrors).length === 0 &&
+          Boolean(email) &&
+          Boolean(password)
       );
     };
 
@@ -106,6 +109,7 @@ export default function LoginScreen() {
         style={styles.input}
         value={email}
         placeholder="Email"
+        placeholderTextColor="#000000"
         onChangeText={(text) => setEmail(text)}
         onBlur={() => setTouched((prev) => ({ ...prev, email: true }))}
         autoCapitalize="none"
@@ -118,6 +122,7 @@ export default function LoginScreen() {
         style={styles.input}
         value={password}
         placeholder="Password"
+        placeholderTextColor="#000000"
         secureTextEntry
         onChangeText={(text) => setPassword(text)}
         onBlur={() => setTouched((prev) => ({ ...prev, password: true }))}
@@ -126,11 +131,22 @@ export default function LoginScreen() {
         <Text style={styles.error}>{errors.password}</Text>
       )}
 
-      <Button
+      {/* <Button
+        color="blue"
         title="Login"
         disabled={!isFormValid}
         onPress={() => handleSubmit(email, password)}
-      />
+      /> */}
+      <Pressable
+        style={[
+          styles.loginButton,
+          !isFormValid && styles.disabledButton,
+        ]}
+        onPress={() => handleSubmit(email, password)}
+        disabled={!isFormValid}
+      >
+        <Text style={styles.loginButtonText}>Login</Text>
+      </Pressable>
 
       <TouchableOpacity onPress={() => router.push("/signup")}>
         <Text style={styles.link}>Don&apos;t have an account? Sign Up</Text>
@@ -173,5 +189,20 @@ const styles = StyleSheet.create({
     fontSize: 14,
     alignSelf: "flex-start",
     marginBottom: 8,
+  },
+  loginButton: {
+    backgroundColor: "#1E90FF",
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: "center",
+  },
+  loginButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
+    paddingHorizontal: 20,
+  },
+  disabledButton: {
+    backgroundColor: "#aaa",
   },
 });
