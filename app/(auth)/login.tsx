@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { doc, getDoc } from "firebase/firestore";
 import { useUser } from "../../context/UserContext";
-import { getAuth, setPersistence, signInWithEmailAndPassword, browserLocalPersistence } from "firebase/auth";
+import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth, db } from "../../firebaseConfig";
 
 interface FramezUser {
@@ -22,18 +22,17 @@ interface FramezUser {
 }
 
 export default function LoginScreen() {
-   const [email, setEmail] = useState("");
-   const [password, setPassword] = useState("");
-   const [errors, setErrors] = useState<{ [key: string]: string }>({});
-   const [touched, setTouched] = useState<{ [key: string]: boolean }>({
-     email: false,
-     password: false,
-   });
-   const [isFormValid, setIsFormValid] = useState(false);
-   const [isLoading, setIsLoading] = useState(false);
-   const [authError, setAuthError] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [touched, setTouched] = useState<{ [key: string]: boolean }>({
+    email: false,
+    password: false,
+  });
+  const [isFormValid, setIsFormValid] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [authError, setAuthError] = useState("");
 
-  const auth = getAuth();
   const { setUser } = useUser();
   const router = useRouter();
 
@@ -78,7 +77,6 @@ export default function LoginScreen() {
       try {
         setIsLoading(true);
         setAuthError("");
-        await setPersistence(auth, browserLocalPersistence);
         const userCredential = await signInWithEmailAndPassword(
           auth,
           email,
@@ -151,9 +149,7 @@ export default function LoginScreen() {
         <Text style={styles.error}>{errors.password}</Text>
       )}
 
-      {authError ? (
-        <Text style={styles.authError}>{authError}</Text>
-      ) : null}
+      {authError ? <Text style={styles.authError}>{authError}</Text> : null}
 
       {/* <Button
         color="blue"

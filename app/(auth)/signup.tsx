@@ -5,12 +5,12 @@ import {
   View,
   Text,
   TouchableOpacity,
-  Pressable
+  Pressable,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
-import { auth, db } from "../../firebaseConfig";
+import { db } from "../../firebaseConfig";
 
 export default function SignupScreen() {
   const [fullname, setFullname] = useState("");
@@ -188,15 +188,12 @@ export default function SignupScreen() {
         onPress={() => handleSubmit(fullname, username, email, password)}
       /> */}
       <Pressable
-              style={[
-                styles.signupButton,
-                !isFormValid && styles.disabledButton,
-              ]}
-              onPress={() => handleSubmit(fullname, username, email, password)}
-              disabled={!isFormValid}
-            >
-              <Text style={styles.signupButtonText}>Sign Up</Text>
-            </Pressable>
+        style={[styles.signupButton, !isFormValid && styles.disabledButton]}
+        onPress={() => handleSubmit(fullname, username, email, password)}
+        disabled={!isFormValid}
+      >
+        <Text style={styles.signupButtonText}>Sign Up</Text>
+      </Pressable>
 
       <TouchableOpacity onPress={() => router.push("/login")}>
         <Text style={styles.link}>Already have an account? Login</Text>

@@ -21,6 +21,7 @@ export interface FramezUser {
 interface UserContextType {
   user: FramezUser | null;
   setUser: React.Dispatch<React.SetStateAction<FramezUser | null>>;
+  loading: boolean;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -36,7 +37,10 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
   useEffect(() => {
     console.log("Setting up auth state listener...");
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      console.log("Auth state changed, firebaseUser:", firebaseUser ? "exists" : "null");
+      console.log(
+        "Auth state changed, firebaseUser:",
+        firebaseUser ? "exists" : "null"
+      );
       if (firebaseUser) {
         try {
           const userDoc = await getDoc(
@@ -80,7 +84,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children }) => {
     );
   }
   return (
-    <UserContext.Provider value={{ user, setUser }}>
+    <UserContext.Provider value={{ user, setUser, loading }}>
       {children}
     </UserContext.Provider>
   );
