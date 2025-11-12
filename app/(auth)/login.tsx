@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { doc, getDoc } from "firebase/firestore";
 import { useUser } from "../../context/UserContext";
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { getAuth, setPersistence, signInWithEmailAndPassword, browserLocalPersistence } from "firebase/auth";
 import { auth, db } from "../../firebaseConfig";
 
 interface FramezUser {
@@ -22,14 +22,16 @@ interface FramezUser {
 }
 
 export default function LoginScreen() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [errors, setErrors] = useState<{ [key: string]: string }>({});
-  const [touched, setTouched] = useState<{ [key: string]: boolean }>({
-    email: false,
-    password: false,
-  });
-  const [isFormValid, setIsFormValid] = useState(false);
+   const [email, setEmail] = useState("");
+   const [password, setPassword] = useState("");
+   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+   const [touched, setTouched] = useState<{ [key: string]: boolean }>({
+     email: false,
+     password: false,
+   });
+   const [isFormValid, setIsFormValid] = useState(false);
+   const [isLoading, setIsLoading] = useState(false);
+   const [authError, setAuthError] = useState("");
 
   const auth = getAuth();
   const { setUser } = useUser();
@@ -74,6 +76,9 @@ export default function LoginScreen() {
   ): Promise<void> {
     if (isFormValid) {
       try {
+        setIsLoading(true);
+        setAuthError("");
+        await setPersistence(auth, browserLocalPersistence);
         const userCredential = await signInWithEmailAndPassword(
           auth,
           email,
@@ -92,8 +97,23 @@ export default function LoginScreen() {
 
         console.log("User logged in successfully:", user);
         router.push("/feed");
-      } catch (error) {
+      } catch (error: any) {
         console.error("Login error:", error);
+        let errorMessage = "An error occurred. Please try again.";
+        if (error.code === "auth/user-not-found") {
+          errorMessage = "No account found with this email address.";
+        } else if (error.code === "auth/wrong-password") {
+          errorMessage = "Incorrect password.";
+        } else if (error.code === "auth/invalid-email") {
+          errorMessage = "Invalid email address.";
+        } else if (error.code === "auth/user-disabled") {
+          errorMessage = "This account has been disabled.";
+        } else if (error.code === "auth/too-many-requests") {
+          errorMessage = "Too many failed attempts. Try again later.";
+        }
+        setAuthError(errorMessage);
+      } finally {
+        setIsLoading(false);
       }
     } else {
       console.log("Form has errors. Please correct them.");
@@ -109,7 +129,7 @@ export default function LoginScreen() {
         style={styles.input}
         value={email}
         placeholder="Email"
-        placeholderTextColor="#000000"
+        placeholderTextColor="#666"
         onChangeText={(text) => setEmail(text)}
         onBlur={() => setTouched((prev) => ({ ...prev, email: true }))}
         autoCapitalize="none"
@@ -119,10 +139,10 @@ export default function LoginScreen() {
       )}
 
       <TextInput
-        style={styles.input}
+        style={[styles.input, styles.passwordInput]}
         value={password}
         placeholder="Password"
-        placeholderTextColor="#000000"
+        placeholderTextColor="#666"
         secureTextEntry
         onChangeText={(text) => setPassword(text)}
         onBlur={() => setTouched((prev) => ({ ...prev, password: true }))}
@@ -130,6 +150,10 @@ export default function LoginScreen() {
       {errors.password && touched.password && (
         <Text style={styles.error}>{errors.password}</Text>
       )}
+
+      {authError ? (
+        <Text style={styles.authError}>{authError}</Text>
+      ) : null}
 
       {/* <Button
         color="blue"
@@ -140,12 +164,14 @@ export default function LoginScreen() {
       <Pressable
         style={[
           styles.loginButton,
-          !isFormValid && styles.disabledButton,
+          (!isFormValid || isLoading) && styles.disabledButton,
         ]}
         onPress={() => handleSubmit(email, password)}
-        disabled={!isFormValid}
+        disabled={!isFormValid || isLoading}
       >
-        <Text style={styles.loginButtonText}>Login</Text>
+        <Text style={styles.loginButtonText}>
+          {isLoading ? "Logging in..." : "Login"}
+        </Text>
       </Pressable>
 
       <TouchableOpacity onPress={() => router.push("/signup")}>
@@ -178,6 +204,10 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     paddingHorizontal: 10,
     backgroundColor: "#fff",
+    color: "#000",
+  },
+  passwordInput: {
+    fontSize: 16,
   },
   link: {
     marginTop: 20,
@@ -189,6 +219,13 @@ const styles = StyleSheet.create({
     fontSize: 14,
     alignSelf: "flex-start",
     marginBottom: 8,
+  },
+  authError: {
+    color: "red",
+    fontSize: 14,
+    alignSelf: "flex-start",
+    marginBottom: 8,
+    textAlign: "center",
   },
   loginButton: {
     backgroundColor: "#1E90FF",

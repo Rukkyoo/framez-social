@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import {
-  StyleSheet,
-  View,
-  Image,
-  ScrollView,
-  TouchableOpacity,
-  Text,
-} from "react-native";
+   StyleSheet,
+   View,
+   Image,
+   ScrollView,
+   TouchableOpacity,
+   Text,
+   RefreshControl,
+ } from "react-native";
 import { ThemedText } from "../../components/themed-text";
 import { ThemedView } from "../../components/themed-view";
 import { useUser } from "../../context/UserContext";
@@ -17,10 +18,11 @@ import { collection, query, where, orderBy, getDocs } from "firebase/firestore";
 import { db } from "../../firebaseConfig";
 
 export default function ProfileScreen() {
-  const { user } = useUser();
-  const router = useRouter();
+   const { user } = useUser();
+   const router = useRouter();
 
-  const [userPosts, setUserPosts] = useState<any[]>([]);
+   const [userPosts, setUserPosts] = useState<any[]>([]);
+   const [refreshing, setRefreshing] = useState(false);
 
   const fetchUserPosts = async () => {
     if (!user?.username) return;
@@ -36,6 +38,12 @@ export default function ProfileScreen() {
       postsArray.push(doc.data());
     });
     setUserPosts(postsArray);
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchUserPosts();
+    setRefreshing(false);
   };
 
   useEffect(() => {
@@ -81,6 +89,9 @@ export default function ProfileScreen() {
         style={styles.scrollContainer}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
       >
         {/* Avatar and Info */}
         <View style={styles.profileSection}>

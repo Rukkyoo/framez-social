@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { StyleSheet, ScrollView, View, Image, TouchableOpacity, Text } from "react-native";
+import { StyleSheet, ScrollView, View, Image, TouchableOpacity, Text, RefreshControl } from "react-native";
 import { ThemedText } from "../../components/themed-text";
 import { ThemedView } from "../../components/themed-view";
 import { useUser } from "../../context/UserContext";
@@ -9,9 +9,10 @@ import { Fonts } from "../../constants/theme";
 import { useRouter } from "expo-router";
 
 export default function FeedScreen() {
-  const { user } = useUser();
-  const [posts, setPosts] = useState<any[]>([]);
-  const router = useRouter();
+   const { user } = useUser();
+   const [posts, setPosts] = useState<any[]>([]);
+   const [refreshing, setRefreshing] = useState(false);
+   const router = useRouter();
 
   const postsCollectionRef = collection(db, "posts");
   const q = query(postsCollectionRef, orderBy("createdAt", "desc"));
@@ -24,6 +25,12 @@ export default function FeedScreen() {
       postsArray.push(postData);
     });
     setPosts(postsArray);
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await getLatestPosts();
+    setRefreshing(false);
   };
 
   useEffect(() => {
@@ -67,6 +74,9 @@ export default function FeedScreen() {
         style={styles.scrollContainer}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
       >
         {/* <ThemedText style={styles.title} type="title">
           Feed
