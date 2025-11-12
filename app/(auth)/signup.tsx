@@ -131,7 +131,7 @@ export default function SignupScreen() {
         style={styles.input}
         value={fullname}
         placeholder="Full Name"
-        placeholderTextColor="#000000"
+        placeholderTextColor="#666"
         onChangeText={(text) => setFullname(text)}
         onBlur={() => setTouched((prev) => ({ ...prev, fullname: true }))}
       />
@@ -144,7 +144,7 @@ export default function SignupScreen() {
         style={styles.input}
         value={username}
         placeholder="Username"
-        placeholderTextColor="#000000"
+        placeholderTextColor="#666"
         onChangeText={(text) => setUsername(text)}
         onBlur={() => setTouched((prev) => ({ ...prev, username: true }))}
         autoCapitalize="none"
@@ -158,7 +158,7 @@ export default function SignupScreen() {
         style={styles.input}
         value={email}
         placeholder="Email"
-        placeholderTextColor="#000000"
+        placeholderTextColor="#666"
         onChangeText={(text) => setEmail(text)}
         onBlur={() => setTouched((prev) => ({ ...prev, email: true }))}
         keyboardType="email-address"
@@ -170,10 +170,10 @@ export default function SignupScreen() {
 
       {/* Password */}
       <TextInput
-        style={styles.input}
+        style={[styles.input, styles.passwordInput]}
         value={password}
         placeholder="Password"
-        placeholderTextColor="#000000"
+        placeholderTextColor="#666"
         secureTextEntry
         onChangeText={(text) => setPassword(text)}
         onBlur={() => setTouched((prev) => ({ ...prev, password: true }))}
@@ -228,6 +228,10 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     paddingHorizontal: 10,
     backgroundColor: "#fff",
+    color: "#000",
+  },
+  passwordInput: {
+    fontSize: 16,
   },
   link: {
     marginTop: 20,
