@@ -14,7 +14,7 @@ import { ThemedText } from "../../components/themed-text";
 import { ThemedView } from "../../components/themed-view";
 import { Fonts } from "../../constants/theme";
 import { uploadImageToCloudinary } from "../utils/uploadImage";
-import { db } from "@/firebaseConfig";
+import { db } from "../../firebaseConfig";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { useUser } from "@/context/UserContext";
 import { useRouter } from "expo-router";
@@ -169,6 +169,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderBottomColor: "#1a1a1a",
     borderBottomWidth: 1,
+    marginTop: 15,
   },
   brandText: {
     color: "#FF69B4",

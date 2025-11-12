@@ -121,6 +121,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     backgroundColor: "#000",
+    marginTop: 15,
     borderBottomWidth: 1,
     borderBottomColor: "#333",
   },

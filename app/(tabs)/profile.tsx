@@ -154,6 +154,7 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     paddingHorizontal: 20,
     flexDirection: "row",
+    marginTop: 15,
     alignItems: "center",
     justifyContent: "space-between",
     backgroundColor: "#000",
