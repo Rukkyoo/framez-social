@@ -1,29 +1,32 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, StatusBar } from "react-native";
 import { router } from "expo-router";
 
 export default function Index() {
   return (
-    <View style={styles.container}>
-      <Text style={styles.welcomeText}>Welcome to Framez</Text>
-      <Text style={styles.smallerText}>Your Social Media App</Text>
+    <>
+      <StatusBar hidden />
+      <View style={styles.container}>
+        <Text style={styles.welcomeText}>Welcome to Framez</Text>
+        <Text style={styles.smallerText}>Your Social Media App</Text>
 
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => router.push("/(auth)/signup")}
-        >
-          <Text style={styles.buttonText}>Signup to Framez</Text>
-        </TouchableOpacity>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => router.push("/(auth)/signup")}
+          >
+            <Text style={styles.buttonText}>Signup to Framez</Text>
+          </TouchableOpacity>
 
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => router.push("/(auth)/login")}
-        >
-          <Text style={styles.buttonText}>Login to Framez</Text>
-        </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => router.push("/(auth)/login")}
+          >
+            <Text style={styles.buttonText}>Login to Framez</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
+    </>
   );
 }
 
